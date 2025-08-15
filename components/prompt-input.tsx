@@ -29,11 +29,10 @@ export function PromptInput() {
     <div className="space-y-6">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-amber-800 mb-2 font-sans">
-          Craft a prompt that brings your image to life
+          Choose a prompt that you want the AI to guess as your image.
         </h2>
         <p className="text-amber-700">
-          Describe what you want the AI to create based on your selected
-          inspiration
+          You want the AI to guess that your prompt is the image.
         </p>
       </div>
 
@@ -44,36 +43,21 @@ export function PromptInput() {
             <img
               src={gameState.selectedImage || "/placeholder.svg"}
               alt="Selected inspiration"
-              className="w-20 h-20 object-cover rounded"
+              className="w-64 h-full rounded"
             />
-            <div>
-              <p className="text-sm text-amber-700 font-medium">
-                Your selected inspiration
-              </p>
-              <p className="text-xs text-amber-600">
-                This will guide the AI's creative process
-              </p>
+            <div className="w-full">
+              <label className="text-sm font-medium text-amber-800">
+                Your prompt
+              </label>
+              <Textarea
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                className="min-h-32 border-amber-200 focus:border-amber-500"
+              />
             </div>
           </div>
         </Card>
       )}
-
-      {/* Prompt Input */}
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-amber-800">
-          Your Creative Prompt
-        </label>
-        <Textarea
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          placeholder="Describe the scene, mood, style, or story you want the AI to create..."
-          className="min-h-32 border-amber-200 focus:border-amber-500"
-        />
-        <p className="text-xs text-amber-600">
-          Be creative! The more descriptive you are, the better the AI can
-          interpret your vision.
-        </p>
-      </div>
 
       {/* Action Buttons */}
       <div className="flex justify-between">

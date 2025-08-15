@@ -8,8 +8,26 @@ import { PromptInput } from "@/components/prompt-input";
 import { ImageGeneration } from "@/components/image-generation";
 import { ResultsDisplay } from "@/components/results-display";
 import { gameStateAtom } from "@/components/game-state";
+import { Suspense, useEffect, useState } from "react";
 
 export default function DixitGame() {
+  const [isLoading, setIsLoading] = useState(true);
+  useEffect(() => {
+    setIsLoading(false);
+  }, []);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <InnerDixitGame />
+    </Suspense>
+  );
+}
+
+function InnerDixitGame() {
   const gameState = useAtomValue(gameStateAtom);
 
   const getStepProgress = () => {

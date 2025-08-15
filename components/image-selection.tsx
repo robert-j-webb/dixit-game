@@ -201,7 +201,7 @@ function ImageCard({
             <img
               src={imageUrl}
               alt={`Inspiration image ${index + 1}: ${title}`}
-              className="w-full h-64 object-cover rounded"
+              className="w-full h-64 object-cover rounded w-min-[300px]"
             />
           </div>
         )}
@@ -218,17 +218,8 @@ export function ImageSelection() {
   const [novelTitles, setNovelTitles] = useState<string[]>(() =>
     getRandomTitles(5)
   );
-  const {
-    images,
-    loadingStates,
-    errors,
-    allLoaded,
-    hasErrors,
-    hasAnyImages,
-    anyLoading,
-    isGenerating,
-    generateImages,
-  } = useGenerateMultipleImages(novelTitles);
+  const { images, loadingStates, anyLoading, generateImages } =
+    useGenerateMultipleImages(novelTitles);
 
   const handleImageSelect = (index: number) => {
     if (selectedIndex === index) {
@@ -308,6 +299,7 @@ export function ImageSelection() {
               )}
             </Button>
           </div>
+          <div className="h-[100px]" />
           {anyLoading && (
             <p className="text-sm text-amber-600">
               {
