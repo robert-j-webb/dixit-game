@@ -1,14 +1,16 @@
-import { imageToBase64 } from "../generateImage/route";
-
 export async function POST(request: Request) {
   try {
-    const { imageUrl, prompt, model } = await request.json();
+    const { imageBase64, prompt, model } = await request.json();
 
-    if (!prompt || !imageUrl || !model) {
-      return Response.json({ error: "Prompt is required" }, { status: 400 });
+    if (!prompt || !imageBase64 || !model) {
+      return Response.json(
+        { error: "Prompt, imageBase64, and model are required" },
+        { status: 400 }
+      );
     }
 
-    const image = imageToBase64(`./public${imageUrl}`);
+    // Remove data URL prefix if present to get just the base64 data
+    const base64Data = imageBase64.replace(/^data:image\/[a-z]+;base64,/, "");
 
     const apiKey = process.env.FIREWORKS_API_KEY;
 
@@ -60,7 +62,7 @@ export async function POST(request: Request) {
                 {
                   type: "image_url",
                   image_url: {
-                    url: `data:image/jpeg;base64,${image}`,
+                    url: `data:image/jpeg;base64,${base64Data}`,
                   },
                 },
                 {

@@ -29,7 +29,7 @@ export function ResultsDisplay() {
     setSelectedModel("");
     // Clear scores from generated images
     const clearedImages = gameState.generatedImages.map((image) => ({
-      url: image.url,
+      base64: image.base64,
       model: image.model,
     }));
     updateGameState({
@@ -48,7 +48,7 @@ export function ResultsDisplay() {
       // Add selected image if it exists
       if (gameState.selectedImage) {
         imagesToEvaluate.push({
-          url: gameState.selectedImage,
+          base64: gameState.selectedImage,
           model: "Selected Image",
         });
       }
@@ -64,7 +64,7 @@ export function ResultsDisplay() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            imageUrl: image.url,
+            imageBase64: image.base64,
             prompt: gameState.userPrompt,
             model: selectedModel,
           }),

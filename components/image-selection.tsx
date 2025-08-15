@@ -93,8 +93,9 @@ function useGenerateMultipleImages(novelTitles: string[]) {
           }
 
           const data = await response.json();
+          const imageBase64 = `data:image/png;base64,${data.base64}`;
 
-          setImages((prev) => ({ ...prev, [index]: data.filename }));
+          setImages((prev) => ({ ...prev, [index]: imageBase64 }));
           setLoadingStates((prev) => ({ ...prev, [index]: false }));
         } catch (err) {
           const errorMessage =
@@ -235,7 +236,7 @@ export function ImageSelection() {
     }
     setSelectedIndex(index);
     const generatedImage = images[index];
-    const imageUrl = generatedImage ? `/${generatedImage}` : null;
+    const imageUrl = generatedImage || null;
     updateGameState({ selectedImage: imageUrl });
   };
 
@@ -321,11 +322,11 @@ export function ImageSelection() {
         <div className="relative flex justify-center items-end min-h-[300px] py-8">
           {novelTitles.map((title, index) => {
             const generatedImage = images[index];
-            const imageUrl = generatedImage
-              ? `/${generatedImage}`
-              : `/placeholder.svg?height=300&width=300&query=${encodeURIComponent(
-                  `Abstract artistic interpretation of ${title}`
-                )}`;
+            const imageUrl =
+              generatedImage ||
+              `/placeholder.svg?height=300&width=300&query=${encodeURIComponent(
+                `Abstract artistic interpretation of ${title}`
+              )}`;
             const isLoading = loadingStates[index];
 
             return (

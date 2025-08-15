@@ -1,16 +1,9 @@
 import { experimental_generateImage as generateImage } from "ai";
-import fs from "fs";
 import { createFireworks } from "@ai-sdk/fireworks";
 
 const fireworks = createFireworks({
   apiKey: process.env.FIREWORKS_API_KEY ?? "",
 });
-
-// Function to convert image to base64
-export function imageToBase64(imagePath: string): string {
-  const imageBuffer = fs.readFileSync(imagePath);
-  return imageBuffer.toString("base64");
-}
 
 // Check if model is a flux model that requires direct API
 function isFluxModel(model: string): boolean {
@@ -111,7 +104,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const prompt = searchParams.get("prompt");
   const model = searchParams.get("model");
-  const inputImagePath = searchParams.get("inputImage"); // Optional input image path
+  const inputImageBase64 = searchParams.get("inputImage"); // Optional input image as base64
 
   if (!prompt || prompt.length === 0 || prompt.length > 512) {
     return Response.json(
@@ -125,26 +118,20 @@ export async function GET(request: Request) {
   }
 
   try {
-    const filename = `generated/image-${Date.now()}.png`;
+    let base64ImageData: string;
 
     if (isFluxModel(model)) {
       // Use direct Fireworks API for flux models
       let inputImage: string | undefined;
 
-      // Convert input image to base64 if provided
-      if (inputImagePath && fs.existsSync(inputImagePath)) {
-        const base64Image = imageToBase64(inputImagePath);
-        inputImage = `data:image/jpeg;base64,${base64Image}`;
+      // Use input image base64 data if provided
+      if (inputImageBase64) {
+        inputImage = inputImageBase64.startsWith("data:")
+          ? inputImageBase64
+          : `data:image/jpeg;base64,${inputImageBase64}`;
       }
 
-      const base64ImageData = await generateFluxImage(
-        model,
-        prompt,
-        inputImage
-      );
-      const buffer = Buffer.from(base64ImageData, "base64");
-
-      fs.writeFileSync(`./public/${filename}`, buffer);
+      base64ImageData = await generateFluxImage(model, prompt, inputImage);
     } else {
       // Use existing AI SDK for non-flux models
       const { image } = await generateImage({
@@ -152,10 +139,13 @@ export async function GET(request: Request) {
         prompt,
       });
 
-      fs.writeFileSync(`./public/${filename}`, image.uint8Array);
+      base64ImageData = Buffer.from(image.uint8Array).toString("base64");
     }
 
-    return Response.json({ filename });
+    return Response.json({
+      base64: base64ImageData,
+      mimeType: "image/png",
+    });
   } catch (error) {
     console.error(error);
     return Response.json(

@@ -53,7 +53,11 @@ export function EvaluationSection({
             <label className="block text-sm font-medium text-purple-800 mb-2">
               Select Evaluation Model:
             </label>
-            <Select value={selectedModel} onValueChange={onModelChange}>
+            <Select
+              value={selectedModel}
+              onValueChange={onModelChange}
+              defaultValue={visionEvalModels[0]}
+            >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Choose a model..." />
               </SelectTrigger>
