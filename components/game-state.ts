@@ -10,6 +10,7 @@ export interface GameState {
     url: string;
     model: string;
     score?: number;
+    reasoning?: string;
   }>;
   isLoading: boolean;
 }
@@ -18,13 +19,16 @@ export const gameStepAtom = atom<GameStep>("selection");
 
 export const selectedImageAtom = atom<string | null>(null);
 
-export const userPromptAtom = atom<string>("");
+export const userPromptAtom = atom<string>(
+  "Interpret <Fill it in>, suitable for a Dixit card game"
+);
 
 export const generatedImagesAtom = atom<
   Array<{
     url: string;
     model: string;
     score?: number;
+    reasoning?: string;
   }>
 >([]);
 
@@ -73,7 +77,7 @@ export const updateGameStateAtom = atom(
     ) {
       set(isGameLoadingAtom, updates.isLoading);
     }
-  },
+  }
 );
 
 // Write-only atom for resetting the game

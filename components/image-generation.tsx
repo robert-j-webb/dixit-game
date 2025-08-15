@@ -1,75 +1,124 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useAtomValue, useSetAtom } from "jotai";
 import { Card } from "@/components/ui/card";
-import { Loader2, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Loader2, Sparkles, Shuffle, CheckCircle } from "lucide-react";
 import { gameStateAtom, updateGameStateAtom } from "@/components/game-state";
+import { imageModels } from "./image-selection";
 
-const AI_MODELS = [
-  "FLUX.1 [dev]",
-  "Stable Diffusion XL",
-  "Midjourney Style",
-  "DALL-E Style",
-];
+const imagesWithoutFlux = imageModels.filter((model) =>
+  model.includes("flux-kontenxt")
+);
 
 export function ImageGeneration() {
   const gameState = useAtomValue(gameStateAtom);
   const updateGameState = useSetAtom(updateGameStateAtom);
   const [currentStep, setCurrentStep] = useState(0);
+  const [selectedModels, setSelectedModels] = useState<string[]>(() =>
+    getRandomModels()
+  );
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isGenerationComplete, setIsGenerationComplete] = useState(false);
   const [generatedImages, setGeneratedImages] = useState<
     Array<{ url: string; model: string; score?: number }>
   >([]);
 
-  useEffect(() => {
-    const generateImages = async () => {
-      updateGameState({ isLoading: true });
+  const generateImages = async () => {
+    if (!gameState.userPrompt || isGenerating) return;
 
-      // Simulate image generation process
-      for (let i = 0; i < AI_MODELS.length; i++) {
-        setCurrentStep(i + 1);
+    setIsGenerating(true);
+    setIsGenerationComplete(false);
+    updateGameState({ isLoading: true });
+    setCurrentStep(0);
+    setGeneratedImages([]);
+    const newGeneratedImages: Array<{
+      url: string;
+      model: string;
+      score?: number;
+    }> = [];
 
-        // Simulate API call delay
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+    // Generate images with selected models
+    await Promise.all(
+      selectedModels.map(async (model) => {
+        try {
+          const prompt = `${gameState.userPrompt}`;
+          const response = await fetch(
+            `/api/generateImage?prompt=${encodeURIComponent(
+              prompt
+            )}&model=${model}`
+          );
 
-        const imageUrl = `/placeholder.svg?height=400&width=400&query=${encodeURIComponent(
-          `${gameState.userPrompt} in ${AI_MODELS[i]} style`,
-        )}`;
+          if (!response.ok) {
+            throw new Error(`Failed to generate image with ${model}`);
+          }
 
-        setGeneratedImages((prev) => [
-          ...prev,
-          {
+          const data = await response.json();
+          const imageUrl = `/${data.filename}`;
+
+          const newImage = {
             url: imageUrl,
-            model: AI_MODELS[i],
-          },
-        ]);
-      }
+            model: model,
+          };
 
-      // Simulate AI evaluation
-      setCurrentStep(5);
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+          newGeneratedImages.push(newImage);
+          setGeneratedImages((prev) => [...prev, newImage]);
+        } catch (error) {
+          console.error(`Error generating image with ${model}:`, error);
+          // Continue with next model even if one fails
+          const fallbackImage = {
+            url: `/placeholder.svg?height=400&width=400&query=${encodeURIComponent(
+              `${gameState.userPrompt} in ${model} style`
+            )}`,
+            model: model,
+          };
+          newGeneratedImages.push(fallbackImage);
+          setGeneratedImages((prev) => [...prev, fallbackImage]);
+          setCurrentStep((prev) => prev + 1);
+        }
+      })
+    );
 
-      // Add random scores
-      const imagesWithScores = generatedImages.map((img) => ({
-        ...img,
-        score: Math.floor(Math.random() * 30) + 70, // Scores between 70-100
-      }));
+    // AI evaluation step
+    setCurrentStep(selectedModels.length + 1);
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      updateGameState({
-        generatedImages: imagesWithScores,
-        isLoading: false,
-        step: "results",
-      });
-    };
+    // Add random scores to completed images
+    const imagesWithScores = newGeneratedImages.map((img) => ({
+      ...img,
+      score: Math.floor(Math.random() * 30) + 70, // Scores between 70-100
+    }));
 
-    generateImages();
-  }, [gameState.userPrompt, updateGameState]);
+    updateGameState({
+      generatedImages: imagesWithScores,
+      isLoading: false,
+    });
+    setIsGenerating(false);
+    setIsGenerationComplete(true);
+  };
+
+  const handleShuffleModels = () => {
+    if (!isGenerating) {
+      setSelectedModels(getRandomModels());
+      setGeneratedImages([]);
+      setCurrentStep(0);
+      setIsGenerationComplete(false);
+    }
+  };
+
+  const handleContinueToResults = () => {
+    updateGameState({ step: "results" });
+  };
 
   const getStepMessage = () => {
-    if (currentStep <= AI_MODELS.length) {
-      return `Generating with ${AI_MODELS[currentStep - 1]}...`;
+    if (currentStep > 0) {
+      return `${generatedImages.length} images generated.`;
     }
-    return "AI is evaluating your creations...";
+    if (currentStep > selectedModels.length) {
+      return "AI is evaluating your creations...";
+    }
+    return "Ready to generate images";
   };
 
   return (
@@ -79,27 +128,80 @@ export function ImageGeneration() {
           AI Creates Your Vision
         </h2>
         <p className="text-amber-700">
-          Multiple AI models are interpreting your prompt
+          Choose your AI models and generate unique interpretations
         </p>
       </div>
 
-      {/* Progress Indicator */}
-      <Card className="p-6 bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-200">
-        <div className="text-center space-y-4">
-          <Sparkles className="h-12 w-12 mx-auto text-amber-600 animate-pulse" />
-          <div>
-            <p className="text-lg font-medium text-amber-800">
-              {getStepMessage()}
-            </p>
-            <p className="text-sm text-amber-600">
-              Step {currentStep} of {AI_MODELS.length + 1}
-            </p>
+      {/* Selected Models Display */}
+      <Card className="p-4 border-amber-200">
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium text-amber-800 text-center">
+            Selected AI Models ({selectedModels.length})
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+            {selectedModels.map((model, index) => (
+              <div
+                key={model}
+                className="p-2 bg-amber-50 border border-amber-200 rounded text-center"
+              >
+                <p className="text-sm font-medium text-amber-800">
+                  {model
+                    .replace(/-/g, " ")
+                    .replace(/\b\w/g, (l) => l.toUpperCase())}
+                </p>
+              </div>
+            ))}
           </div>
-          <div className="flex justify-center">
-            <Loader2 className="h-6 w-6 animate-spin text-amber-600" />
+          <div className="flex justify-center gap-3">
+            <Button
+              onClick={handleShuffleModels}
+              disabled={isGenerating}
+              variant="outline"
+              className="border-amber-300 text-amber-700 hover:bg-amber-50"
+            >
+              <Shuffle className="h-4 w-4 mr-2" />
+              Shuffle Models
+            </Button>
+            <Button
+              onClick={generateImages}
+              disabled={!gameState.userPrompt || isGenerating}
+              className="bg-amber-600 hover:bg-amber-700 text-white px-8"
+            >
+              {isGenerating ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Generate Images
+                </>
+              )}
+            </Button>
           </div>
         </div>
       </Card>
+
+      {/* Progress Indicator - Only show during generation */}
+      {isGenerating && (
+        <Card className="p-6 bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-200">
+          <div className="text-center space-y-4">
+            <Sparkles className="h-12 w-12 mx-auto text-amber-600 animate-pulse" />
+            <div>
+              <p className="text-lg font-medium text-amber-800">
+                {getStepMessage()}
+              </p>
+              <p className="text-sm text-amber-600">
+                Step {currentStep} of {selectedModels.length}
+              </p>
+            </div>
+            <div className="flex justify-center">
+              <Loader2 className="h-6 w-6 animate-spin text-amber-600" />
+            </div>
+          </div>
+        </Card>
+      )}
 
       {/* Your Prompt */}
       <Card className="p-4 bg-white border-amber-200">
@@ -117,7 +219,7 @@ export function ImageGeneration() {
               <img
                 src={image.url || "/placeholder.svg"}
                 alt={`Generated by ${image.model}`}
-                className="w-full h-32 object-cover rounded mb-2"
+                className="w-full h-full rounded mb-2 object-contain"
               />
               <p className="text-xs text-center text-amber-700 font-medium">
                 {image.model}
@@ -126,6 +228,22 @@ export function ImageGeneration() {
           ))}
         </div>
       )}
+
+      {/* Continue Button */}
+      {isGenerationComplete && (
+        <div className="text-center">
+          <Button onClick={handleContinueToResults}>
+            <CheckCircle className="h-5 w-5 mr-2" />
+            Continue to Image Evaluation
+          </Button>
+        </div>
+      )}
     </div>
   );
+}
+
+// Function to randomly select 5 models from the full list
+function getRandomModels(count: number = 5): string[] {
+  const shuffled = [...imagesWithoutFlux].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
 }

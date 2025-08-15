@@ -7,14 +7,14 @@ const fireworks = createFireworks({
 });
 
 // Function to convert image to base64
-function imageToBase64(imagePath: string): string {
+export function imageToBase64(imagePath: string): string {
   const imageBuffer = fs.readFileSync(imagePath);
   return imageBuffer.toString("base64");
 }
 
 // Check if model is a flux model that requires direct API
 function isFluxModel(model: string): boolean {
-  return model.includes("flux-kontext") || model.includes("flux-1");
+  return model.includes("flux-kontext");
 }
 
 // Generate image using direct Fireworks API for flux models
@@ -56,6 +56,7 @@ async function generateFluxImage(
   const result = await response.json();
 
   if (!result.request_id) {
+    console.error(result);
     throw new Error("Failed to get request_id from Fireworks API");
   }
 

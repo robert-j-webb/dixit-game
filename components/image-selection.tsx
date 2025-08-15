@@ -20,7 +20,7 @@ function getRandomTitles(count: number = 5): string[] {
   return shuffled.slice(0, count);
 }
 
-const imageModels = [
+export const imageModels = [
   "flux-kontext-pro",
   "flux-kontext-max",
   "flux-1-schnell-fp8",
@@ -78,30 +78,32 @@ function useGenerateMultipleImages(novelTitles: string[]) {
     setErrors(clearedErrors);
 
     // Generate images for each title
-    novelTitles.forEach(async (title, index) => {
-      try {
-        const prompt = `Interpret ${title}, suitable for a Dixit card game`;
-        const response = await fetch(
-          `/api/generateImage?prompt=${encodeURIComponent(
-            prompt
-          )}&model=${selectedModel}`
-        );
+    await Promise.all(
+      novelTitles.map(async (title, index) => {
+        try {
+          const prompt = `Interpret ${title}, suitable for a Dixit card game`;
+          const response = await fetch(
+            `/api/generateImage?prompt=${encodeURIComponent(
+              prompt
+            )}&model=${selectedModel}`
+          );
 
-        if (!response.ok) {
-          throw new Error("Failed to generate image");
+          if (!response.ok) {
+            throw new Error("Failed to generate image");
+          }
+
+          const data = await response.json();
+
+          setImages((prev) => ({ ...prev, [index]: data.filename }));
+          setLoadingStates((prev) => ({ ...prev, [index]: false }));
+        } catch (err) {
+          const errorMessage =
+            err instanceof Error ? err.message : "An unknown error occurred";
+          setErrors((prev) => ({ ...prev, [index]: errorMessage }));
+          setLoadingStates((prev) => ({ ...prev, [index]: false }));
         }
-
-        const data = await response.json();
-
-        setImages((prev) => ({ ...prev, [index]: data.filename }));
-        setLoadingStates((prev) => ({ ...prev, [index]: false }));
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : "An unknown error occurred";
-        setErrors((prev) => ({ ...prev, [index]: errorMessage }));
-        setLoadingStates((prev) => ({ ...prev, [index]: false }));
-      }
-    });
+      })
+    );
   };
 
   const allLoaded = Object.values(loadingStates).every((loading) => !loading);
@@ -139,6 +141,7 @@ interface ImageCardProps {
   totalCards: number;
   onSelect: (index: number) => void;
   onHover: (index: number | null) => void;
+  disabled: boolean;
 }
 
 function ImageCard({
@@ -151,6 +154,7 @@ function ImageCard({
   totalCards,
   onSelect,
   onHover,
+  disabled,
 }: ImageCardProps) {
   // Calculate rotation and position for hand of cards effect
   const centerIndex = (totalCards - 1) / 2;
@@ -176,6 +180,8 @@ function ImageCard({
   return (
     <Card
       className={`absolute cursor-pointer transition-all duration-300 ease-out ${
+        disabled ? "opacity-50" : ""
+      } ${
         isSelected
           ? "ring-2 ring-amber-500 shadow-2xl"
           : isHovered
@@ -187,7 +193,7 @@ function ImageCard({
         zIndex,
         transformOrigin: "center bottom",
       }}
-      onClick={() => onSelect(index)}
+      onClick={() => !disabled && onSelect(index)}
       onMouseEnter={() => onHover(index)}
       onMouseLeave={() => onHover(null)}
     >
@@ -218,7 +224,7 @@ export function ImageSelection() {
   const [novelTitles, setNovelTitles] = useState<string[]>(() =>
     getRandomTitles(5)
   );
-  const { images, loadingStates, anyLoading, generateImages } =
+  const { images, loadingStates, anyLoading, generateImages, hasAnyImages } =
     useGenerateMultipleImages(novelTitles);
 
   const handleImageSelect = (index: number) => {
@@ -311,33 +317,35 @@ export function ImageSelection() {
           )}
         </div>
       </div>
+      {hasAnyImages && (
+        <div className="relative flex justify-center items-end min-h-[300px] py-8">
+          {novelTitles.map((title, index) => {
+            const generatedImage = images[index];
+            const imageUrl = generatedImage
+              ? `/${generatedImage}`
+              : `/placeholder.svg?height=300&width=300&query=${encodeURIComponent(
+                  `Abstract artistic interpretation of ${title}`
+                )}`;
+            const isLoading = loadingStates[index];
 
-      <div className="relative flex justify-center items-end min-h-[300px] py-8">
-        {novelTitles.map((title, index) => {
-          const generatedImage = images[index];
-          const imageUrl = generatedImage
-            ? `/${generatedImage}`
-            : `/placeholder.svg?height=300&width=300&query=${encodeURIComponent(
-                `Abstract artistic interpretation of ${title}`
-              )}`;
-          const isLoading = loadingStates[index];
-
-          return (
-            <ImageCard
-              key={index}
-              title={title}
-              index={index}
-              imageUrl={imageUrl}
-              isLoading={isLoading}
-              isSelected={selectedIndex === index}
-              isHovered={hoveredIndex === index}
-              totalCards={novelTitles.length}
-              onSelect={handleImageSelect}
-              onHover={handleCardHover}
-            />
-          );
-        })}
-      </div>
+            return (
+              <ImageCard
+                key={index}
+                title={title}
+                index={index}
+                imageUrl={imageUrl}
+                isLoading={isLoading}
+                isSelected={selectedIndex === index}
+                isHovered={hoveredIndex === index}
+                totalCards={novelTitles.length}
+                onSelect={handleImageSelect}
+                onHover={handleCardHover}
+                disabled={anyLoading}
+              />
+            );
+          })}
+        </div>
+      )}
 
       <div className="text-center">
         <Button
