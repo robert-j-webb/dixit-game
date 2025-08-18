@@ -14,6 +14,7 @@ import { useState } from "react";
 import { EvaluationSection } from "@/components/evaluation-section";
 import { WinnerSpotlight } from "@/components/winner-spotlight";
 import { AllResults } from "@/components/all-results";
+import { useProvider } from "@/lib/image-model";
 
 export function ResultsDisplay() {
   const gameState = useAtomValue(gameStateAtom);
@@ -24,12 +25,13 @@ export function ResultsDisplay() {
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [hasEvaluated, setHasEvaluated] = useState(false);
 
+  const provider = useProvider();
   const resetEvaluation = () => {
     setHasEvaluated(false);
     setSelectedModel("");
     // Clear scores from generated images
     const clearedImages = gameState.generatedImages.map((image) => ({
-      base64: image.base64,
+      src: image.src,
       model: image.model,
     }));
     updateGameState({
@@ -48,7 +50,7 @@ export function ResultsDisplay() {
       // Add selected image if it exists
       if (gameState.selectedImage) {
         imagesToEvaluate.push({
-          base64: gameState.selectedImage,
+          src: gameState.selectedImage,
           model: "Selected Image",
         });
       }
@@ -64,9 +66,10 @@ export function ResultsDisplay() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            imageBase64: image.base64,
+            imageUrl: image.src,
             prompt: gameState.userPrompt,
             model: selectedModel,
+            provider,
           }),
         });
 

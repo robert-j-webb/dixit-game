@@ -7,7 +7,7 @@ export interface GameState {
   selectedImage: string | null;
   userPrompt: string;
   generatedImages: Array<{
-    base64: string;
+    src: string;
     model: string;
     score?: number;
     reasoning?: string;
@@ -25,7 +25,7 @@ export const userPromptAtom = atom<string>(
 
 export const generatedImagesAtom = atom<
   Array<{
-    base64: string;
+    src: string;
     model: string;
     score?: number;
     reasoning?: string;

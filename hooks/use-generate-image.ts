@@ -23,7 +23,11 @@ export function useGenerateImage(prompt: string, model: string) {
         }
 
         const data = await response.json();
-        setImage(data.filename);
+        const imageUrl = data.url
+          ? data.url
+          : `data:image/png;base64,${data.base64}`;
+
+        setImage(imageUrl);
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "An unknown error occurred"

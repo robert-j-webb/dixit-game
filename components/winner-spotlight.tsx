@@ -10,7 +10,7 @@ import {
 import { Trophy, Info } from "lucide-react";
 
 interface WinnerImage {
-  base64: string;
+  src: string;
   model: string;
   score?: number;
   reasoning?: string;
@@ -35,7 +35,7 @@ export function WinnerSpotlight({
           <h3 className="text-xl font-bold text-amber-800">Winner!</h3>
         </div>
         <img
-          src={winner.base64 || "/placeholder.svg"}
+          src={winner.src || "/placeholder.svg"}
           alt={`Winner: ${winner.model}`}
           className="w-48 h-48 object-cover rounded-lg mx-auto shadow-lg"
         />

@@ -10,7 +10,7 @@ import {
 import { Trophy, Medal, Award, Info } from "lucide-react";
 
 interface ResultImage {
-  base64: string;
+  src: string;
   model: string;
   score?: number;
   reasoning?: string;
@@ -64,7 +64,7 @@ export function AllResults({ images, hasEvaluated }: AllResultsProps) {
                 <span className="font-bold text-amber-800">#{index + 1}</span>
               </div>
               <img
-                src={image.base64 || "/placeholder.svg"}
+                src={image.src || "/placeholder.svg"}
                 alt={`${image.model} result`}
                 className="w-16 h-16 object-cover rounded"
               />

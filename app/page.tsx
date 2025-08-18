@@ -3,12 +3,20 @@
 import { useAtomValue } from "jotai";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ImageSelection } from "@/components/image-selection";
 import { PromptInput } from "@/components/prompt-input";
 import { ImageGeneration } from "@/components/image-generation";
 import { ResultsDisplay } from "@/components/results-display";
 import { gameStateAtom } from "@/components/game-state";
 import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function DixitGame() {
   const [isLoading, setIsLoading] = useState(true);
@@ -29,6 +37,21 @@ export default function DixitGame() {
 
 function InnerDixitGame() {
   const gameState = useAtomValue(gameStateAtom);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const currentProvider = searchParams.get("provider");
+
+  useEffect(() => {
+    if (!currentProvider) {
+      router.replace("?provider=together");
+    }
+  }, [currentProvider, router]);
+
+  const handleProviderChange = (provider: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("provider", provider);
+    router.replace(`?${params.toString()}`);
+  };
 
   const getStepProgress = () => {
     switch (gameState.step) {
@@ -65,12 +88,36 @@ function InnerDixitGame() {
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-amber-800 mb-2 font-sans">
-            Dixit
-          </h1>
-          <p className="text-amber-700 text-lg font-sans">
-            Unleash Your Imagination Through AI-Powered Storytelling
-          </p>
+          <div className="flex justify-between items-start mb-4">
+            <div className="flex-1" />
+            <div className="flex-1">
+              <h1 className="text-4xl font-bold text-amber-800 mb-2 font-sans">
+                Dixit
+              </h1>
+              <p className="text-amber-700 text-lg font-sans">
+                Unleash Your Imagination Through AI-Powered Storytelling
+              </p>
+            </div>
+            <div className="flex-1 flex justify-end">
+              <div className="flex flex-col items-end">
+                <label className="text-sm text-amber-700 mb-1 font-medium">
+                  Provider
+                </label>
+                <Select
+                  value={currentProvider}
+                  onValueChange={handleProviderChange}
+                >
+                  <SelectTrigger className="w-32 text-amber-800 border-amber-300">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="together">Together</SelectItem>
+                    <SelectItem value="fireworks">Fireworks</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Progress Bar */}

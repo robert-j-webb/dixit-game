@@ -9,13 +9,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useVisionModels } from "@/lib/vision-model";
 import { Sparkles } from "lucide-react";
-
-const visionEvalModels = [
-  "llama4-maverick-instruct-basic",
-  "llama4-scout-instruct-basic",
-  "qwen2p5-vl-32b-instruct",
-];
 
 interface EvaluationSectionProps {
   selectedModel: string;
@@ -32,6 +27,7 @@ export function EvaluationSection({
   isEvaluating,
   hasEvaluated,
 }: EvaluationSectionProps) {
+  const visionModels = useVisionModels();
   if (hasEvaluated) return null;
 
   return (
@@ -56,13 +52,13 @@ export function EvaluationSection({
             <Select
               value={selectedModel}
               onValueChange={onModelChange}
-              defaultValue={visionEvalModels[0]}
+              defaultValue={visionModels[0]}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Choose a model..." />
               </SelectTrigger>
               <SelectContent>
-                {visionEvalModels.map((model) => (
+                {visionModels.map((model) => (
                   <SelectItem key={model} value={model}>
                     {model}
                   </SelectItem>

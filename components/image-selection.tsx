@@ -13,24 +13,13 @@ import {
 } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
 import { updateGameStateAtom } from "@/components/game-state";
+import { useImageModels, useProvider } from "@/lib/image-model";
 
 // Function to randomly select unique novel titles
 function getRandomTitles(count: number = 5): string[] {
   const shuffled = [...ALL_NOVEL_TITLES].sort(() => 0.5 - Math.random());
   return shuffled.slice(0, count);
 }
-
-export const imageModels = [
-  "flux-kontext-pro",
-  "flux-kontext-max",
-  "flux-1-schnell-fp8",
-  "flux-1-dev-fp8",
-  "stable-diffusion-xl-1024-v1-0",
-  "playground-v2-1024px-aesthetic",
-  "playground-v2-5-1024px-aesthetic",
-  "SSD-1B",
-  "japanese-stable-diffusion-xl",
-];
 
 // Hook to generate multiple images for novel titles
 function useGenerateMultipleImages(novelTitles: string[]) {
@@ -40,7 +29,7 @@ function useGenerateMultipleImages(novelTitles: string[]) {
   }>({});
   const [errors, setErrors] = useState<{ [key: string]: string | null }>({});
   const [isGenerating, setIsGenerating] = useState(false);
-
+  const provider = useProvider();
   // Initialize states with no loading
   useEffect(() => {
     const initialImages: { [key: string]: string | null } = {};
@@ -85,7 +74,7 @@ function useGenerateMultipleImages(novelTitles: string[]) {
           const response = await fetch(
             `/api/generateImage?prompt=${encodeURIComponent(
               prompt
-            )}&model=${selectedModel}`
+            )}&model=${selectedModel}&provider=${provider}`
           );
 
           if (!response.ok) {
@@ -93,9 +82,11 @@ function useGenerateMultipleImages(novelTitles: string[]) {
           }
 
           const data = await response.json();
-          const imageBase64 = `data:image/png;base64,${data.base64}`;
+          const imageUrl = data.url
+            ? data.url
+            : `data:image/png;base64,${data.base64}`;
 
-          setImages((prev) => ({ ...prev, [index]: imageBase64 }));
+          setImages((prev) => ({ ...prev, [index]: imageUrl }));
           setLoadingStates((prev) => ({ ...prev, [index]: false }));
         } catch (err) {
           const errorMessage =
@@ -221,6 +212,7 @@ export function ImageSelection() {
   const updateGameState = useSetAtom(updateGameStateAtom);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const imageModels = useImageModels();
   const [selectedModel, setSelectedModel] = useState<string>(imageModels[4]);
   const [novelTitles, setNovelTitles] = useState<string[]>(() =>
     getRandomTitles(5)
