@@ -28,6 +28,8 @@ const fireworksModels = [
   "japanese-stable-diffusion-xl",
 ];
 
+const baseTenModels = ["Flux.1-schnell"];
+
 export function useProvider() {
   const searchParams = useSearchParams();
   return searchParams.get("provider");
@@ -36,9 +38,14 @@ export function useProvider() {
 export function useImageModels() {
   const provider = useProvider();
 
-  if (provider === "together") {
-    return togetherModels;
-  } else {
-    return fireworksModels;
+  switch (provider) {
+    case "together":
+      return togetherModels;
+    case "fireworks":
+      return fireworksModels;
+    case "base-ten":
+      return baseTenModels;
+    default:
+      throw new Error(`Invalid provider: ${provider}`);
   }
 }

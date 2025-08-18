@@ -16,12 +16,24 @@ const fireworksModels = [
   "qwen2p5-vl-32b-instruct",
 ];
 
+const baseTenModels = [
+  "meta-llama/Llama-4-Scout-17B-16E-Instruct",
+  "meta-llama/Llama-4-Maverick-17B-128E-Instruct",
+  "openai/gpt-oss-120b",
+  "Qwen/Qwen3-235B-A22B-Instruct-2507",
+];
+
 export function useVisionModels() {
   const provider = useProvider();
 
-  if (provider === "together") {
-    return togetherModels;
-  } else {
-    return fireworksModels;
+  switch (provider) {
+    case "together":
+      return togetherModels;
+    case "fireworks":
+      return fireworksModels;
+    case "base-ten":
+      return baseTenModels;
+    default:
+      throw new Error(`Invalid provider: ${provider}`);
   }
 }

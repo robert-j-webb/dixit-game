@@ -213,7 +213,9 @@ export function ImageSelection() {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const imageModels = useImageModels();
-  const [selectedModel, setSelectedModel] = useState<string>(imageModels[4]);
+  const [selectedModel, setSelectedModel] = useState<string>(
+    imageModels[4] || imageModels[0]
+  );
   const [novelTitles, setNovelTitles] = useState<string[]>(() =>
     getRandomTitles(5)
   );

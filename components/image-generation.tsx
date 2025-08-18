@@ -141,7 +141,7 @@ export function ImageGeneration() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
             {selectedModels.map((model, index) => (
               <div
-                key={model}
+                key={index}
                 className="p-2 bg-amber-50 border border-amber-200 rounded text-center"
               >
                 <p className="text-sm font-medium text-amber-800">
@@ -244,6 +244,9 @@ export function ImageGeneration() {
 
 // Function to randomly select 5 models from the full list
 function getRandomModels(models: string[], count: number = 5): string[] {
+  while (models.length < count) {
+    models.push(models[0]);
+  }
   const shuffled = [...models].sort(() => 0.5 - Math.random());
   return shuffled.slice(0, count);
 }

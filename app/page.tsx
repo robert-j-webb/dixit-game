@@ -113,6 +113,7 @@ function InnerDixitGame() {
                   <SelectContent>
                     <SelectItem value="together">Together</SelectItem>
                     <SelectItem value="fireworks">Fireworks</SelectItem>
+                    <SelectItem value="base-ten">Base Ten</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

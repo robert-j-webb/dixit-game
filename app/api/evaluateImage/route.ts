@@ -1,3 +1,4 @@
+import { baseTenEvaluateImage } from "@/lib/serverUtil/base-ten-evaluate-image";
 import { fireworksEvaluateImage } from "@/lib/serverUtil/fireworks-evaluate-image";
 import { togetherEvaluateImage } from "@/lib/serverUtil/together-evaluate-image";
 
@@ -46,6 +47,15 @@ Return your response as JSON with detailed reasoning and a score from 0-100.`;
       case "fireworks":
         return Response.json(
           await fireworksEvaluateImage({
+            imageBase64: imageUrl,
+            prompt,
+            model,
+            jsonSchema,
+          })
+        );
+      case "base-ten":
+        return Response.json(
+          await baseTenEvaluateImage({
             imageBase64: imageUrl,
             prompt,
             model,
