@@ -1,3 +1,4 @@
+import { amazonBedrockGenerateImage } from "@/lib/serverUtil/amazon-bedrock-generate-image";
 import { baseTenGenerateImage } from "@/lib/serverUtil/base-ten-generate-image";
 import { fireworksGenerateImage } from "@/lib/serverUtil/fireworks-generate-image";
 import { togetherGenerateImage } from "@/lib/serverUtil/together-generate-image";
@@ -32,6 +33,10 @@ export async function GET(request: Request) {
       case "base-ten":
         return Response.json({
           base64: await baseTenGenerateImage(model, prompt),
+        });
+      case "amazon-bedrock":
+        return Response.json({
+          base64: await amazonBedrockGenerateImage(model, prompt),
         });
       default:
         return Response.json({ error: "Invalid provider" }, { status: 400 });

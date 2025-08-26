@@ -1,13 +1,13 @@
 import { useSearchParams } from "next/navigation";
 
 const togetherModels = [
+  "black-forest-labs/FLUX.1-schnell", 
   "black-forest-labs/FLUX.1-krea-dev",
   // "black-forest-labs/FLUX.1-kontext-dev", condition_image is required for this model
   "black-forest-labs/FLUX.1-kontext-pro",
   "black-forest-labs/FLUX.1-kontext-max",
   "black-forest-labs/FLUX.1-dev",
   // "black-forest-labs/FLUX.1-dev-lora", image_loras is required for this model
-  "black-forest-labs/FLUX.1-schnell",
   // "black-forest-labs/FLUX.1-canny", reference image is missing
   // "black-forest-labs/FLUX.1-depth", reference image is missing
   // "black-forest-labs/FLUX.1-redux", reference image is missing
@@ -30,9 +30,16 @@ const fireworksModels = [
 
 const baseTenModels = ["Flux.1-schnell"];
 
+const amazonBedrockModels = [
+  "amazon.nova-canvas-v1:0",
+  "amazon.titan-image-generator-v2:0",
+  "amazon.titan-image-generator-v1",
+  "stability.stable-diffusion-xl-v1",
+]
+
 export function useProvider() {
   const searchParams = useSearchParams();
-  return searchParams.get("provider");
+  return searchParams.get("provider") ?? "together";
 }
 
 export function useImageModels() {
@@ -41,10 +48,12 @@ export function useImageModels() {
   switch (provider) {
     case "together":
       return togetherModels;
-    case "fireworks":
-      return fireworksModels;
-    case "base-ten":
-      return baseTenModels;
+      case "fireworks":
+        return fireworksModels;
+      case "base-ten":
+        return baseTenModels;
+      case "amazon-bedrock":
+        return amazonBedrockModels;
     default:
       throw new Error(`Invalid provider: ${provider}`);
   }

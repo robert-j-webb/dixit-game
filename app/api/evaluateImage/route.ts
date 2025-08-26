@@ -1,3 +1,4 @@
+import { amazonBedrockEvaluateImage } from "@/lib/serverUtil/amazon-bedrock-evaluate-image";
 import { baseTenEvaluateImage } from "@/lib/serverUtil/base-ten-evaluate-image";
 import { fireworksEvaluateImage } from "@/lib/serverUtil/fireworks-evaluate-image";
 import { togetherEvaluateImage } from "@/lib/serverUtil/together-evaluate-image";
@@ -66,6 +67,15 @@ Return your response as JSON with detailed reasoning and a score from 0-100.`;
         return Response.json(
           await togetherEvaluateImage({
             imageUrl,
+            prompt,
+            model,
+            jsonSchema,
+          })
+        );
+      case "amazon-bedrock":
+        return Response.json(
+          await amazonBedrockEvaluateImage({
+            imageBase64: imageUrl,
             prompt,
             model,
             jsonSchema,

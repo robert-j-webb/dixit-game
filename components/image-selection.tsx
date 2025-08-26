@@ -213,14 +213,18 @@ export function ImageSelection() {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const imageModels = useImageModels();
-  const [selectedModel, setSelectedModel] = useState<string>(
-    imageModels[4] || imageModels[0]
-  );
+  const [selectedModel, setSelectedModel] = useState<string>(imageModels[0]);
   const [novelTitles, setNovelTitles] = useState<string[]>(() =>
     getRandomTitles(5)
   );
   const { images, loadingStates, anyLoading, generateImages, hasAnyImages } =
     useGenerateMultipleImages(novelTitles);
+
+  const provider = useProvider();
+
+  useEffect(() => {
+    setSelectedModel(imageModels[0]);
+  }, [provider, imageModels]);
 
   const handleImageSelect = (index: number) => {
     if (selectedIndex === index) {
