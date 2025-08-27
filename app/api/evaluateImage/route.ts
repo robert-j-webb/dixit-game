@@ -1,6 +1,7 @@
 import { amazonBedrockEvaluateImage } from "@/lib/serverUtil/amazon-bedrock-evaluate-image";
 import { baseTenEvaluateImage } from "@/lib/serverUtil/base-ten-evaluate-image";
 import { fireworksEvaluateImage } from "@/lib/serverUtil/fireworks-evaluate-image";
+import { googleVertexEvaluateImage } from "@/lib/serverUtil/google-vertex-evaluate-image";
 import { togetherEvaluateImage } from "@/lib/serverUtil/together-evaluate-image";
 
 export async function POST(request: Request) {
@@ -75,6 +76,15 @@ Return your response as JSON with detailed reasoning and a score from 0-100.`;
       case "amazon-bedrock":
         return Response.json(
           await amazonBedrockEvaluateImage({
+            imageBase64: imageUrl,
+            prompt,
+            model,
+            jsonSchema,
+          })
+        );
+      case "google-vertex":
+        return Response.json(
+          await googleVertexEvaluateImage({
             imageBase64: imageUrl,
             prompt,
             model,

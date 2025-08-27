@@ -43,6 +43,18 @@ const amazonBedrockModels = [
   "mistral.pixtral-large-2502-v1:0",
 ];
 
+const googleVertexModels = [
+  "gemini-2.5-flash-image-preview PreviewHOT",
+  "gemini-2.5-flash-lite",
+  "gemini-2.5-flash",
+  "gemini-2.5-pro",
+  "gemini-2.0-flash-001",
+  "gemini-2.0-flash-lite-001",
+  "gemini-2.0-flash-preview-image-generation Preview",
+  "gemini-1.5-flash-002",
+  "gemini-1.5-pro-002",
+];
+
 export function useVisionModels() {
   const provider = useProvider();
 
@@ -55,6 +67,8 @@ export function useVisionModels() {
       return baseTenModels;
     case "amazon-bedrock":
       return amazonBedrockModels;
+    case "google-vertex":
+      return googleVertexModels;
     default:
       throw new Error(`Invalid provider: ${provider}`);
   }

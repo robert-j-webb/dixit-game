@@ -104,17 +104,20 @@ function InnerDixitGame() {
                   Provider
                 </label>
                 <Select
-                  value={currentProvider}
+                  value={currentProvider ?? "together"}
                   onValueChange={handleProviderChange}
                 >
-                  <SelectTrigger className="w-32 text-amber-800 border-amber-300">
+                  <SelectTrigger className="w-full text-amber-800 border-amber-300">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="together">Together</SelectItem>
                     <SelectItem value="fireworks">Fireworks</SelectItem>
                     <SelectItem value="base-ten">Base Ten</SelectItem>
-                    <SelectItem value="amazon-bedrock">Amazon Bedrock</SelectItem>
+                    <SelectItem value="amazon-bedrock">
+                      Amazon Bedrock
+                    </SelectItem>
+                    <SelectItem value="google-vertex">Google Vertex</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

@@ -1,7 +1,7 @@
 import { useSearchParams } from "next/navigation";
 
 const togetherModels = [
-  "black-forest-labs/FLUX.1-schnell", 
+  "black-forest-labs/FLUX.1-schnell",
   "black-forest-labs/FLUX.1-krea-dev",
   // "black-forest-labs/FLUX.1-kontext-dev", condition_image is required for this model
   "black-forest-labs/FLUX.1-kontext-pro",
@@ -35,7 +35,16 @@ const amazonBedrockModels = [
   "amazon.titan-image-generator-v2:0",
   "amazon.titan-image-generator-v1",
   "stability.stable-diffusion-xl-v1",
-]
+];
+
+const googleVertexModels = [
+  "imagen-4.0-generate-001",
+  "imagen-4.0-ultra-generate-001",
+  "imagen-4.0-fast-generate-001",
+  "imagen-3.0-generate-002",
+  "imagen-3.0-fast-generate-001",
+  "imagegeneration@002",
+];
 
 export function useProvider() {
   const searchParams = useSearchParams();
@@ -48,12 +57,14 @@ export function useImageModels() {
   switch (provider) {
     case "together":
       return togetherModels;
-      case "fireworks":
-        return fireworksModels;
-      case "base-ten":
-        return baseTenModels;
-      case "amazon-bedrock":
-        return amazonBedrockModels;
+    case "fireworks":
+      return fireworksModels;
+    case "base-ten":
+      return baseTenModels;
+    case "amazon-bedrock":
+      return amazonBedrockModels;
+    case "google-vertex":
+      return googleVertexModels;
     default:
       throw new Error(`Invalid provider: ${provider}`);
   }

@@ -73,7 +73,7 @@ export async function amazonBedrockEvaluateImage({
   }
 }
 
-function returnWrapResponse(score: number, reasoning: string) {
+export function returnWrapResponse(score: number, reasoning: string) {
   return {
     choices: [
       {
