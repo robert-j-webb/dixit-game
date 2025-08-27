@@ -32,6 +32,8 @@ export async function amazonBedrockEvaluateImage({
     },
   });
 
+  let output = "";
+
   try {
     const response = await client.send(
       new ConverseCommand({
@@ -61,14 +63,19 @@ export async function amazonBedrockEvaluateImage({
         },
       })
     );
-    const answer = JSON.parse(
-      response.output?.message?.content?.[0]?.text ?? "{}"
-    );
+    output = response.output?.message?.content?.[0]?.text ?? "";
+    let answer: Record<string, any> = {};
+    try {
+      answer = JSON.parse(output ?? "{}");
+    } catch (e) {
+      answer = JSON.parse(output.replaceAll("\n", "") ?? "{}");
+    }
     const score = answer.score ?? answer.properties?.score ?? 0;
     const reasoning =
       answer.reasoning ?? answer.properties?.reasoning ?? "Error parsing";
     return returnWrapResponse(score, reasoning);
   } catch (error) {
+    console.log(output);
     throw error;
   }
 }
